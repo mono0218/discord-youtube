@@ -1,0 +1,31 @@
+{
+  "name": "discord-youtube",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "type": "module",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@discordjs/opus": "^0.9.0",
+    "@discordjs/voice": "^0.15.0",
+    "axios": "^1.3.4",
+    "config": "^3.3.9",
+    "discord.js": "^14.8.0",
+    "dotenv": "^16.0.3",
+    "ffmpeg-static": "^5.1.0",
+    "fluent-ffmpeg": "^2.1.2",
+    "fs": "^0.0.1-security",
+    "log4js": "^6.9.1",
+    "microsoft-cognitiveservices-speech-sdk": "^1.27.0",
+    "openai": "^3.2.1",
+    "opusscript": "^0.0.8",
+    "tweetnacl": "^1.0.3",
+    "ytdl": "^1.4.1",
+    "ytdl-core": "^4.11.4"
+  }
+}
