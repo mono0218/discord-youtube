@@ -30,4 +30,4 @@ jobs:
         file: Dockerfile
         platforms: linux/amd64,linux/arm64
         push: true
-        tags: monokamo/mono-youtube-bot:latest
+        tags: monokamo/mono-youtube-bot:${{ github.event.inputs.comment }}
