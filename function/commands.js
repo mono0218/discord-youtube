@@ -37,8 +37,12 @@ export async function commands(){
             },
         ]
     };
+    const skip ={
+        name:"skip",
+        description:"スキップします"
+    }
 
-    return [ping, join, bye, play]
+    return [ping, join, bye, play,skip]
 }
 
 /**
@@ -80,8 +84,12 @@ export async function CommandReply(interaction){
 
     if(interaction.commandName === 'play'){
         const url = interaction.options.getString('content')
-        console.log(url)
-        await youtube(url,interaction)
         await interaction.reply({ content: '受け付けました', ephemeral: true })
+        await youtube(url,interaction)
+    }
+
+    if(interaction.commandName === 'skip'){
+        player.stop();
+        await interaction.reply("スキップしました")
     }
 }

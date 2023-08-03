@@ -27,7 +27,7 @@ async function waitUntilPlayFinish(player) {
  */
 async function AudioPlay(stream,interaction){
     let resource = createAudioResource(stream, { inputType: StreamType.Arbitrary, inlineVolume: true });
+    resource.volume.setVolume(0.1);
     await waitUntilPlayFinish(player);
     player.play(resource);
-    await interaction.reply({ content: '受け付けました', ephemeral: true })
 }
