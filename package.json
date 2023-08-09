@@ -24,6 +24,7 @@
     "microsoft-cognitiveservices-speech-sdk": "^1.27.0",
     "openai": "^3.2.1",
     "opusscript": "^0.0.8",
+    "play-dl": "^1.9.6",
     "tweetnacl": "^1.0.3",
     "ytdl": "^1.4.1",
     "ytdl-core": "^4.11.4"
