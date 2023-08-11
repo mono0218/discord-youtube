@@ -1,5 +1,5 @@
 import { EmbedBuilder, StringSelectMenuBuilder,StringSelectMenuOptionBuilder,ActionRowBuilder, } from 'discord.js';
-import {serach} from "./youtube.js"
+import {search} from "./youtube.js"
 
 export const ConnectEmbed = new EmbedBuilder()
 	.setColor(0x0099FF)
@@ -44,9 +44,9 @@ export const PlayInfo = (info) => new EmbedBuilder()
 	.setTimestamp();
 
 	
-export async function SerachEmbed(word,interaction){
+export async function searchEmbed(word,interaction){
 
-	const result = await serach(word)
+	const result = await search(word)
 
 	const ResultEmbed =  new EmbedBuilder()
 		.setColor(0x0099FF)

@@ -2,7 +2,7 @@ import {client, player} from "../index.js"
 import {youtube} from "./youtube.js"
 import connect from "./connection.js"
 import {getVoiceConnection} from "@discordjs/voice";
-import { SerachEmbed,PingEmbed,VCError1,VCError2,SkipEmbed,DisconnectEmbed } from "./Embed.js";
+import { searchEmbed,PingEmbed,VCError1,VCError2,SkipEmbed,DisconnectEmbed } from "./Embed.js";
 import { Integration } from "discord.js";
 
 let lockflag = false
@@ -42,8 +42,8 @@ export async function commands(){
         ]
     };
 
-    const serach = {
-        name:"serach",
+    const search = {
+        name:"search",
         description:"音楽を検索します",
         options: [
             {
@@ -61,7 +61,7 @@ export async function commands(){
         description:"スキップします"
     }
 
-    return [ping, join, bye, play,skip,serach]
+    return [ping, join, bye, play,skip,search]
 }
 
 /**
@@ -106,9 +106,9 @@ export async function CommandReply(interaction){
         await youtube(url,interaction)
     }
 
-    if(interaction.commandName === 'serach'){
+    if(interaction.commandName === 'search'){
         const word = interaction.options.getString('word')
-        await SerachEmbed(word,interaction)
+        await searchEmbed(word,interaction)
     }
 
     if(interaction.commandName === 'skip'){

@@ -11,7 +11,7 @@ export async function youtube(url,interaction){
     await AudioPlay(stream,interaction,url)
 }
 
-export async function serach(word){
+export async function search(word){
     const result = await play.search(word)
     let list = []
     for (let i = 0; i < 4; i++) {
