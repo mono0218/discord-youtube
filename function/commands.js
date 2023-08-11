@@ -3,6 +3,7 @@ import {youtube} from "./youtube.js"
 import connect from "./connection.js"
 import {getVoiceConnection} from "@discordjs/voice";
 import { SerachEmbed,PingEmbed,VCError1,VCError2,SkipEmbed,DisconnectEmbed } from "./Embed.js";
+import { Integration } from "discord.js";
 
 let lockflag = false
 
@@ -129,6 +130,6 @@ export async function SelectMenuReply(interaction){
         const msg = await channel.messages.fetch(interaction.message.id);
         await msg.delete();
         await interaction.reply({ content: '再生を受け付けました', components: [],ephemeral:true });
-        youtube(interaction.values[0])
+        youtube(interaction.values[0],interaction)
     }
 }

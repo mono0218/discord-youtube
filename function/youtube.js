@@ -7,6 +7,7 @@ import { PlayInfo } from "./Embed.js";
 
 export async function youtube(url,interaction){
     const stream = await play.stream(url)
+    console.log(interaction)
     await AudioPlay(stream,interaction,url)
 }
 
@@ -56,6 +57,7 @@ async function AudioPlay(stream,interaction,url){
     await waitUntilPlayFinish(player);
 
     const info = PlayInfo(await basic_info(url))
+    console.log(interaction)
     const channel = await client.channels.fetch(interaction.channelId)
     channel.send({embeds:[await info]})
 
