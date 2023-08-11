@@ -2,7 +2,7 @@ import { Client, GatewayIntentBits, } from "discord.js"
 import dotenv from "dotenv"
 dotenv.config();
 import { createAudioPlayer } from "@discordjs/voice";
-import {commands,CommandReply} from "./function/commands.js"
+import {commands,CommandReply,SelectMenuReply} from "./function/commands.js"
 
 export const client = new Client({ intents: [
         GatewayIntentBits.Guilds,
@@ -19,7 +19,14 @@ client.once('ready', async() => {
 });
 
 client.on('interactionCreate', async (interaction) => {
-    await CommandReply(interaction)
+    if(interaction.isCommand()){
+        await CommandReply(interaction)
+    }else if(interaction.isSelectMenu()){
+        await SelectMenuReply(interaction)
+    }else{
+        return
+    }
+    
 });
 
 client.on('error', console.warn);

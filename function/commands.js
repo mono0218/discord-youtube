@@ -1,9 +1,12 @@
 import {client, player} from "../index.js"
-import youtube from "./youtube.js"
+import {youtube} from "./youtube.js"
 import connect from "./connection.js"
 import {getVoiceConnection} from "@discordjs/voice";
+import { SerachEmbed,PingEmbed,VCError1,VCError2,SkipEmbed,DisconnectEmbed } from "./Embed.js";
 
-let lockflag = 0
+let lockflag = false
+
+export function modifyLock( value ) { lockflag = value; }
 
 /**
  * slashコマンド一覧入手
@@ -31,18 +34,33 @@ export async function commands(){
         options: [
             {
                 type: 3,
-                name: "content",
+                name: "url",
                 description: "urlを貼り付けてください",
                 required: true,
             },
         ]
     };
+
+    const serach = {
+        name:"serach",
+        description:"音楽を検索します",
+        options: [
+            {
+                type: 3,
+                name: "word",
+                description: "検索したい音楽を指定してください",
+                required: true,
+            },
+        ]
+    };
+
+
     const skip ={
         name:"skip",
         description:"スキップします"
     }
 
-    return [ping, join, bye, play,skip]
+    return [ping, join, bye, play,skip,serach]
 }
 
 /**
@@ -55,41 +73,62 @@ export async function CommandReply(interaction){
     if (!interaction.isCommand()) {
         return;
     }
-
     if (interaction.commandName === 'ping') {
-        await interaction.reply('Pong！');
+        await interaction.reply({ embeds: [PingEmbed ]});
     }
 
     if(interaction.commandName === 'join'){
 
         if(lockflag === true){
-            interaction.reply('すでに接続しています');
+            interaction.reply({ embeds: [VCError1 ]});
         }else{
-            await connect(interaction, client, player)
+            connect(interaction,client,player)
             lockflag = true
         }
     }
-
+    
     if(interaction.commandName === 'bye'){
         const connection = getVoiceConnection(interaction.guildId);
         if(connection === undefined){
-            interaction.reply('vcに接続していません');
+            interaction.reply({ embeds: [VCError2 ]});
         }else{
             connection.disconnect();
             console.log(interaction.guildId+"のVCから退出しました")
             lockflag = false
-            await interaction.reply('bye');
+            interaction.reply({ embeds: [DisconnectEmbed ]});
         }
     }
 
     if(interaction.commandName === 'play'){
-        const url = interaction.options.getString('content')
+        const url = interaction.options.getString('url')
         await interaction.reply({ content: '受け付けました', ephemeral: true })
         await youtube(url,interaction)
+    }
+
+    if(interaction.commandName === 'serach'){
+        const word = interaction.options.getString('word')
+        await SerachEmbed(word,interaction)
     }
 
     if(interaction.commandName === 'skip'){
         player.stop();
         await interaction.reply("スキップしました")
+    }
+}
+
+export async function SelectMenuReply(interaction){
+    if(interaction.customId==="starter"){
+        if(interaction.values[0]==="キャンセルする"){
+            const channel = interaction.channel
+            const msg = await channel.messages.fetch(interaction.message.id);
+            await msg.delete(); 
+            await interaction.reply({ content: 'キャンセルしました', components: [],ephemeral:true });
+        }
+        
+        const channel = interaction.channel;
+        const msg = await channel.messages.fetch(interaction.message.id);
+        await msg.delete();
+        await interaction.reply({ content: '再生を受け付けました', components: [],ephemeral:true });
+        youtube(interaction.values[0])
     }
 }
