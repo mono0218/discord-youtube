@@ -1,9 +1,13 @@
 import {client, player} from "../index.js"
-import {youtube} from "./youtube.js"
+import {InQueue, youtube} from "./youtube.js"
 import connect from "./connection.js"
 import {getVoiceConnection} from "@discordjs/voice";
-import { searchEmbed,PingEmbed,VCError1,VCError2,SkipEmbed,DisconnectEmbed } from "./Embed.js";
+import { searchEmbed,PingEmbed,VCError1,VCError2,SkipEmbed,DisconnectEmbed,Queue } from "./Embed.js";
+import {AudioPlayerStatus, createAudioResource, StreamType} from "@discordjs/voice";
 import { Integration } from "discord.js";
+import {list, search} from "./youtube.js"
+import { EmbedBuilder, StringSelectMenuBuilder,StringSelectMenuOptionBuilder,ActionRowBuilder, } from 'discord.js';
+import {ViewClientLock,modifyClientLock} from "../index.js"
 
 let lockflag = false
 
@@ -61,7 +65,12 @@ export async function commands(){
         description:"スキップします"
     }
 
-    return [ping, join, bye, play,skip,search]
+    const queue ={
+        name:"queue",
+        description:"予約中の音楽を表示します"
+    }
+
+    return [ping, join, bye, play,skip,search,queue]
 }
 
 /**
@@ -88,6 +97,21 @@ export async function CommandReply(interaction){
         }
     }
     
+    const func = async msg=> {
+        await youtube()
+        list.shift()
+    }
+
+    if(interaction.commandName === 'play'){
+        const url = await interaction.options.getString('url')
+        await InQueue(url,interaction)
+        await interaction.reply({ content: '受け付けました', ephemeral: true })
+        if (ViewClientLock() === false){
+            modifyClientLock(true)
+            player.on(AudioPlayerStatus.Idle,func());
+        }
+    }
+
     if(interaction.commandName === 'bye'){
         const connection = getVoiceConnection(interaction.guildId);
         if(connection === undefined){
@@ -95,15 +119,11 @@ export async function CommandReply(interaction){
         }else{
             connection.disconnect();
             console.log(interaction.guildId+"のVCから退出しました")
-            lockflag = false
-            interaction.reply({ embeds: [DisconnectEmbed ]});
-        }
-    }
+            player.off(AudioPlayerStatus.Idle);
+            modifyClientLock(false)
 
-    if(interaction.commandName === 'play'){
-        const url = interaction.options.getString('url')
-        await interaction.reply({ content: '受け付けました', ephemeral: true })
-        await youtube(url,interaction)
+            await interaction.reply({ embeds: [DisconnectEmbed ]});
+        }
     }
 
     if(interaction.commandName === 'search'){
@@ -113,7 +133,26 @@ export async function CommandReply(interaction){
 
     if(interaction.commandName === 'skip'){
         player.stop();
+        func()
         await interaction.reply("スキップしました")
+    }
+
+    if(interaction.commandName === 'queue'){
+        let text = ""
+        if(list.length===0){
+            text = "予約されている曲はありません"
+        }else{
+            for(let i = 0;i<list.length;i++){
+                text=text+`${i+1}. ${list[i].title}\n\n`
+            }
+        }
+        
+        const Embed =  new EmbedBuilder()
+            .setColor(0x0099FF)
+            .setTitle("再生リスト")
+            .setDescription(text)
+        
+        await interaction.reply({embeds:[ Embed]})
     }
 }
 
@@ -130,6 +169,6 @@ export async function SelectMenuReply(interaction){
         const msg = await channel.messages.fetch(interaction.message.id);
         await msg.delete();
         await interaction.reply({ content: '再生を受け付けました', components: [],ephemeral:true });
-        youtube(interaction.values[0],interaction)
+        await InQueue(interaction.values[0],interaction)
     }
 }

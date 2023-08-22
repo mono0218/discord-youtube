@@ -4,6 +4,8 @@ dotenv.config();
 import { createAudioPlayer } from "@discordjs/voice";
 import {commands,CommandReply,SelectMenuReply} from "./function/commands.js"
 
+export let clientlock = false
+
 export const client = new Client({ intents: [
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
@@ -12,6 +14,10 @@ export const client = new Client({ intents: [
         GatewayIntentBits.GuildVoiceStates,] });
 
 export const player = createAudioPlayer();
+
+export function modifyClientLock( value ) { clientlock = value; }
+
+export function ViewClientLock() { return clientlock}
 
 client.once('ready', async() => {
     await client.application.commands.set(await commands(), process.env.GuildID);

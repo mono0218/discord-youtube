@@ -4,12 +4,40 @@ const play = pkg;
 import {AudioPlayerStatus, createAudioResource, StreamType} from "@discordjs/voice";
 import { PlayInfo } from "./Embed.js";
 
-export async function youtube(url,interaction){
-    const stream = await play.stream(url)
-    console.log(interaction)
-    await AudioPlay(stream,interaction,url)
+export const list = []
+
+/**
+ * キューに動画を入れる
+ * @params url
+ * @params interaction
+ */
+export async function InQueue(url,interaction){
+    const info = await basic_info(url)
+    list.push({url:url,interaction:interaction,title:info.video_details.title,})
 }
 
+/**
+ * 動画の詳細情報を入手する
+ * @params url
+ */
+async function basic_info(url){
+    const info = await play.video_basic_info(url)
+    return info
+}
+
+/**
+ * 動画を再生する
+ * @params url
+ * @params interaction
+ */
+export async function youtube(){
+    await AudioPlay(list[0].interaction,list[0].url)
+}
+
+/**
+ * 動画を検索する
+ * @params word
+ */
 export async function search(word){
     const result = await play.search(word)
     let list = []
@@ -20,29 +48,10 @@ export async function search(word){
 		}else{
 			text= result[i].title
 		}
-        list.push({title: text,url:result[i].url,number:i+1})
+        const info = await basic_info(url)
+        list.push({url:url,interaction:interaction,title:info.video_details.title})
 	}
     return list
-}
-
-async function basic_info(url){
-    const info = await play.video_basic_info(url)
-    return info
-}
-
-
-/**
- * 読み上げが終わるまで待機する
- */
-async function waitUntilPlayFinish(player) {
-    return new Promise((resolve, _) => {
-        if (player.state.status === AudioPlayerStatus.Idle) {
-            return resolve();
-        }
-        player.once(AudioPlayerStatus.Idle, () => {
-            resolve();
-        });
-    });
 }
 
 /**
@@ -50,15 +59,19 @@ async function waitUntilPlayFinish(player) {
  * @params stream
  * @params player
  */
-async function AudioPlay(stream,interaction,url){
-    let resource = createAudioResource(stream.stream, { inputType: stream.type, inlineVolume: true });
-    resource.volume.setVolume(0.1);
-    await waitUntilPlayFinish(player);
+async function AudioPlay(interaction,url){
+    
 
     const info = PlayInfo(await basic_info(url))
-    console.log(interaction)
     const channel = await client.channels.fetch(interaction.channelId)
     channel.send({embeds:[await info]})
 
-    player.play(resource);
+    const stream = await play.stream(url)
+    
+    let resource = createAudioResource(stream.stream, { inputType: stream.type, inlineVolume: true });
+    resource.volume.setVolume(0.1);
+
+    Promise.all(
+        [player.play(resource)]
+    )
 }

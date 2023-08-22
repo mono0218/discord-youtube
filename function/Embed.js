@@ -1,5 +1,5 @@
 import { EmbedBuilder, StringSelectMenuBuilder,StringSelectMenuOptionBuilder,ActionRowBuilder, } from 'discord.js';
-import {search} from "./youtube.js"
+import {list, search} from "./youtube.js"
 
 export const ConnectEmbed = new EmbedBuilder()
 	.setColor(0x0099FF)
@@ -42,6 +42,24 @@ export const PlayInfo = (info) => new EmbedBuilder()
 		text: "monokamo",
 	})
 	.setTimestamp();
+
+export async function Queue(){
+	let text = ""
+	if(list.length===0){
+		text = "予約されている曲はありません"
+	}else{
+		for(let i = 0;i<list.length;i++){
+			text=text+`${i+1}. ${list[i].title}\n\n`
+		}
+	}
+	
+	const Embed =  new EmbedBuilder()
+		.setColor(0x0099FF)
+		.setTitle("再生リスト")
+		.setDescription(text)
+
+	return Embed
+}
 
 	
 export async function searchEmbed(word,interaction){
