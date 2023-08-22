@@ -1,4 +1,3 @@
-import ytdl from "ytdl-core"
 import {player,client} from "../index.js"
 import pkg from 'play-dl';
 const play = pkg;
