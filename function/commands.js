@@ -83,6 +83,7 @@ export async function CommandReply(interaction){
     if (!interaction.isCommand()) {
         return;
     }
+    
     if (interaction.commandName === 'ping') {
         await interaction.reply({ embeds: [PingEmbed ]});
     }
