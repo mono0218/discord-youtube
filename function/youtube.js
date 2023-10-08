@@ -4,7 +4,18 @@ const play = pkg;
 import {AudioPlayerStatus, createAudioResource, StreamType} from "@discordjs/voice";
 import { PlayInfo } from "./Embed.js";
 
-export const list = []
+export var list = []
+
+async function waitUntilPlayFinish() {
+    return new Promise((resolve, _) => {
+        if (player.state.status == AudioPlayerStatus.Idle) {
+            return resolve();
+        }
+        player.once(AudioPlayerStatus.Idle, () => {
+            resolve();
+        });
+    });
+}
 
 /**
  * キューに動画を入れる
@@ -14,24 +25,17 @@ export const list = []
 export async function InQueue(url,interaction){
     const info = await basic_info(url)
     list.push({url:url,interaction:interaction,title:info.video_details.title,})
+    
+    await waitUntilPlayFinish()
+    await AudioPlay()
 }
 
 /**
  * 動画の詳細情報を入手する
  * @params url
  */
-async function basic_info(url){
-    const info = await play.video_basic_info(url)
-    return info
-}
-
-/**
- * 動画を再生する
- * @params url
- * @params interaction
- */
-export async function youtube(){
-    await AudioPlay(list[0].interaction,list[0].url)
+export async function basic_info(url){
+    return await play.video_basic_info(url)
 }
 
 /**
@@ -59,9 +63,10 @@ export async function search(word){
  * @params stream
  * @params player
  */
-async function AudioPlay(interaction,url){
+export async function AudioPlay(){
+    const interaction = list[0].interaction
+    const url = list[0].url
     
-
     const info = PlayInfo(await basic_info(url))
     const channel = await client.channels.fetch(interaction.channelId)
     channel.send({embeds:[await info]})
@@ -73,5 +78,7 @@ async function AudioPlay(interaction,url){
 
     Promise.all(
         [player.play(resource)]
-    )
+    ).then((result) => {
+        list.shift()
+    })
 }

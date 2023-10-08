@@ -1,6 +1,5 @@
 import {joinVoiceChannel,getVoiceConnection, VoiceConnectionStatus,} from "@discordjs/voice"
 import {player,client} from "../index.js"
-import { modifyLock } from "./commands.js";
 import { ConnectEmbed } from "./Embed.js";
 
 /**
@@ -48,11 +47,9 @@ export default async function connect(interaction){
 
     connection.once(VoiceConnectionStatus.Disconnected, ()=>{
         player.stop();
-        modifyLock(false)
     });
 
     connection.once(VoiceConnectionStatus.Destroyed, ()=>{
         player.stop();
-        modifyLock(false)
     });
 }

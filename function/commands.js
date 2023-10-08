@@ -1,17 +1,11 @@
 import {client, player} from "../index.js"
-import {InQueue, youtube} from "./youtube.js"
+import {InQueue, AudioPlay} from "./youtube.js"
 import connect from "./connection.js"
 import {getVoiceConnection} from "@discordjs/voice";
 import { searchEmbed,PingEmbed,VCError1,VCError2,SkipEmbed,DisconnectEmbed,Queue } from "./Embed.js";
 import {AudioPlayerStatus, createAudioResource, StreamType} from "@discordjs/voice";
-import { Integration } from "discord.js";
 import {list, search} from "./youtube.js"
 import { EmbedBuilder, StringSelectMenuBuilder,StringSelectMenuOptionBuilder,ActionRowBuilder, } from 'discord.js';
-import {ViewClientLock,modifyClientLock} from "../index.js"
-
-let lockflag = false
-
-export function modifyLock( value ) { lockflag = value; }
 
 /**
  * slashコマンド一覧入手
@@ -83,46 +77,39 @@ export async function CommandReply(interaction){
     if (!interaction.isCommand()) {
         return;
     }
-    
+
+    const func = async msg=> {
+        await AudioPlay()
+    }
+
     if (interaction.commandName === 'ping') {
         await interaction.reply({ embeds: [PingEmbed ]});
     }
 
     if(interaction.commandName === 'join'){
-
-        if(lockflag === true){
+        var connection = getVoiceConnection(interaction.guildId);
+        console.log(connection)
+        if(connection != undefined){
             interaction.reply({ embeds: [VCError1 ]});
         }else{
             connect(interaction,client,player)
-            lockflag = true
         }
-    }
-    
-    const func = async msg=> {
-        await youtube()
-        list.shift()
     }
 
     if(interaction.commandName === 'play'){
         const url = await interaction.options.getString('url')
-        await InQueue(url,interaction)
         await interaction.reply({ content: '受け付けました', ephemeral: true })
-        if (ViewClientLock() === false){
-            modifyClientLock(true)
-            player.on(AudioPlayerStatus.Idle,func());
-        }
+        await InQueue(url,interaction)
     }
 
     if(interaction.commandName === 'bye'){
-        const connection = getVoiceConnection(interaction.guildId);
+        var connection = getVoiceConnection(interaction.guildId);
         if(connection === undefined){
             interaction.reply({ embeds: [VCError2 ]});
         }else{
-            connection.disconnect();
+            await connection.destroy();
+            connection = undefined
             console.log(interaction.guildId+"のVCから退出しました")
-            player.off(AudioPlayerStatus.Idle);
-            modifyClientLock(false)
-
             await interaction.reply({ embeds: [DisconnectEmbed ]});
         }
     }
@@ -134,7 +121,6 @@ export async function CommandReply(interaction){
 
     if(interaction.commandName === 'skip'){
         player.stop();
-        func()
         await interaction.reply("スキップしました")
     }
 
